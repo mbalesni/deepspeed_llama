@@ -4,7 +4,7 @@
 
 This directory contains code to fine-tune a LLaMA model with DeepSpeed on a compute cluster. 
 
-It assumes that you have access to a compute cluster with a SLURM scheduler and access to the LLaMA model weights.
+It assumes that you have access to a compute cluster with a SLURM scheduler and access to the LLaMA model weights. In particular, the path to the model is currently hardcoded.
 
 ## Installation
 
