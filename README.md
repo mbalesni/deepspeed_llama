@@ -1,5 +1,7 @@
 # Fine-tune LLaMA with DeepSpeed
 
+> **WARNING**: This code was not tested **at all**. This was adapted from a private repo blindly without ever having been run. Expect it to not run from the first few attempts and to have numerous bugs.
+
 This directory contains code to fine-tune a LLaMA model with DeepSpeed on a compute cluster. 
 
 It assumes that you have access to a compute cluster with a SLURM scheduler and access to the LLaMA model weights.
@@ -32,9 +34,9 @@ This will run a sweep of experiments defined in `experiments/example_sweeps/13b.
 
 ## Requirements
 
-The requirements aren't clear for now. This was only run on 80GB A100 GPUs.
+Only Linux.
 
-Only one GPU should be necessary for the finetuning, but more GPUs will speed up the training significantly. 
+The hardware requirements aren't clear for now. This was only run on 80GB A100 GPUs. Only one GPU should be necessary for the finetuning, but more GPUs will speed up the training significantly. 
 
 **NB:** RAM usage scales with the number of GPUs. E.g. LLaMA-13B loaded in BF16 takes up ~26GB of RAM per GPU before being transferred to the GPU. This way, fine-tuning a 30B model on 8xA100 requires at least 480GB of RAM, with some overhead (to be safe, I'd say you should have 600GB.)
 
