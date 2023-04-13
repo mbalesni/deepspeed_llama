@@ -1,0 +1,14 @@
+
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info
+*.egg
+
+poetry.lock
+.env
+.vscode
+
+.DS_Store

@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "deepspeed-llama"
+version = "0.1.0"
+description = ""
+authors = ["Mykyta Baliesnyi <nikita.balesny@gmail.com>"]
+readme = "README.md"
+packages = [{include = "deepspeed_llama."}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+deepspeed = "^0.8.3"
+transformers = {git = "https://github.com/huggingface/transformers"}
+datasets = "^2.11.0"
+torch = "2"
+wandb = "^0.14.2"
+debugpy = "^1.6.7"
+poetry = "^1.4.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
