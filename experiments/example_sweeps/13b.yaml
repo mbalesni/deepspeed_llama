@@ -19,7 +19,6 @@ fixed_parameters:
 hyperparameters:
   lr:
     - 0.00001
-    - 0.0001
   model_name:
     - 'llama-13b'
   train_path:

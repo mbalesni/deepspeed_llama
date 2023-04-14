@@ -9,7 +9,10 @@ import copy
 
 def get_hugface_dataset(path: str, tokenizer, eval: bool = False) -> Dataset:
 
-    dataset = load_dataset(path, cache_dir="./cache")
+    dataset = dataset = load_dataset(
+        'json', data_files=path,
+        cache_dir="./cache",
+    )
     tokenized_dataset = tokenize_dataset(dataset, tokenizer, eval=eval)
 
     assert isinstance(tokenized_dataset, Dataset)

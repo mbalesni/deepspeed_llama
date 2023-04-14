@@ -8,17 +8,15 @@ It assumes that you have access to a compute cluster with a SLURM scheduler and 
 
 ## Installation
 
-1. In a fresh empty conda environment, install this repo as a package:
-
 ```bash
+git clone git@github.com:nikebless/deepspeed_llama.git
+cd deepspeed_llama
 pip install -e .
 ```
 
-2. You might need to run `poetry install` after this to install all dependencies, not sure.
-
 ## Fine-tuning
 
-1. Before running the thing, add your W&B API key to to the environment:
+1. First, add your W&B API key to to the environment:
 
 ```bash
 export WANDB_API_KEY=your_api_key
@@ -30,7 +28,7 @@ export WANDB_API_KEY=your_api_key
 python run/sweep.py --experiment_name "testing" --config_file experiments/example_sweeps/13b.yaml
 ```
 
-This will run a sweep of experiments defined in `experiments/example_sweeps/13b.yaml` and log the results to W&B.
+This will run a sweep of experiments defined in `experiments/example_sweeps/13b.yaml` and log the learning curves and results to W&B.
 
 ## Requirements
 

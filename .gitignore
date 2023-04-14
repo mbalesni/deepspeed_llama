@@ -7,8 +7,11 @@ __pycache__
 *.egg-info
 *.egg
 
+wandb
 poetry.lock
 .env
 .vscode
+experiments/example_sweeps/logs
+experiments/example_sweeps/sweep_configs
 
 .DS_Store

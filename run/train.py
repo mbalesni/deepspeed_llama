@@ -14,12 +14,17 @@ def main(project: str, name: str, config: Dict, args: Namespace):
 
     wandb.init(project=project, name=name, config=config, group=name) # NOTE: this will log `n_gpus` W&B runs at once, to see them nicely, group the runs on W&B by group
 
-    data_path = wandb.config.data_path
+    train_path = wandb.config.train_path
+    validation_path = wandb.config.validation_path
     data_dir = os.path.join(project_dir, wandb.config.data_dir)
     deepspeed_config = os.path.join(project_dir, wandb.config.deepspeed_config)
 
-    wandb.config.update({"data_path": data_path, "data_dir": data_dir,
-                        "deepspeed_config": deepspeed_config}, allow_val_change=True)
+    wandb.config.update({
+        "train_path": train_path,
+        "validation_path": validation_path,
+        "data_dir": data_dir,
+        "deepspeed_config": deepspeed_config
+    }, allow_val_change=True)
     model, tokenizer = get_llama_hf_model(wandb.config.model_name)
 
     datasets, tokenizer = get_datasets(tokenizer=tokenizer, verbose=args.logging, num_retries=args.num_dataset_retries)
