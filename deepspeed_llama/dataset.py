@@ -5,19 +5,23 @@ from datasets.load import load_dataset
 import os
 import wandb
 import copy
+from typing import Tuple
 
 
-def get_hugface_dataset(path: str, tokenizer, eval: bool = False) -> Dataset:
+def get_hugface_datasets(train_path: str, validation_path: str, tokenizer, is_eval: bool = False) -> Tuple[Dataset, Dataset]:
 
-    dataset = dataset = load_dataset(
-        'json', data_files=path,
+    dataset = load_dataset(
+        'json', data_files={
+            "train": train_path,
+            "validation": validation_path,
+        },
         cache_dir="./cache",
     )
-    tokenized_dataset = tokenize_dataset(dataset, tokenizer, eval=eval)
+    assert isinstance(dataset, DatasetDict)
 
-    assert isinstance(tokenized_dataset, Dataset)
+    train_dataset, eval_dataset  = tokenize_datasets(dataset, tokenizer, eval=is_eval)
 
-    return tokenized_dataset
+    return train_dataset, eval_dataset
 
 
 def preprocess_function_dec(examples, tokenizer):
@@ -56,7 +60,7 @@ def max_pad_evaluate(examples, tokenizer, max_pad_length, keys_to_pad=["input_id
     return examples
 
 
-def tokenize_dataset(dataset, tokenizer, num_proc: int = 16, eval: bool = False) -> Dataset:
+def tokenize_datasets(dataset: DatasetDict, tokenizer, num_proc: int = 16, eval: bool = False) -> Tuple[Dataset, Dataset]:
 
     def preprocess_function(examples): return preprocess_function_dec(examples, tokenizer=tokenizer)
     def max_pad_function_curried(max_length): return (
@@ -70,11 +74,13 @@ def tokenize_dataset(dataset, tokenizer, num_proc: int = 16, eval: bool = False)
         desc="Running tokenizer on dataset",
     )
 
-    max_length_labels = max([len(x) for x in preprocessed_dataset["labels"]])
+    train_dataset = preprocessed_dataset["train"]
+    eval_dataset = preprocessed_dataset["validation"]
+
+    max_length_labels = max([len(x) for x in eval_dataset["labels"]])
     max_pad_function = max_pad_function_curried(max_length_labels)
 
-    if eval:
-        preprocessed_dataset = preprocessed_dataset.map(max_pad_function, batched=True, num_proc=num_proc,
-                                        load_from_cache_file=False, desc="Padding validation dataset")
+    eval_dataset = eval_dataset.map(max_pad_function, batched=True, num_proc=num_proc,
+                                    load_from_cache_file=False, desc="Padding validation dataset")
 
-    return preprocessed_dataset
+    return train_dataset, eval_dataset

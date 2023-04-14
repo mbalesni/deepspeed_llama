@@ -63,7 +63,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.debug:
-        attach_debugger(args.debug_port)
+        # check if main process via env
+        if os.environ.get('LOCAL_RANK', '0') == '0':
+            attach_debugger(args.debug_port)
 
     config = json.load(open(args.file, 'r'))[args.task_id]
 

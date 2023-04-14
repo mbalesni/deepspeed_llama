@@ -16,7 +16,7 @@ from transformers import (Seq2SeqTrainer, Trainer,
                           PreTrainedTokenizerFast, PreTrainedModel, DataCollatorWithPadding)
 from datasets.arrow_dataset import Dataset
 from deepspeed_llama.evaluation import evaluate_completions_exact_match
-from deepspeed_llama.dataset import get_hugface_dataset
+from deepspeed_llama.dataset import get_hugface_datasets
 import math
 import os
 
@@ -71,9 +71,6 @@ def get_compute_metrics_fn(tokenizer: TTokenizer, eval_dataset: Dataset, directo
             predictions = predictions[0]
 
         pred_tokens = torch.argmax(torch.tensor(predictions), dim=-1)
-        preds_all = [x.replace(tokenizer.pad_token, "") for x in tokenizer.batch_decode(pred_tokens)]
-        for i, pred_i in enumerate(preds_all):
-            print(f"PRED {i}: {pred_i}")
         label_tokens = eval_preds.label_ids
         assert isinstance(label_tokens, np.ndarray), "Typing screams if it's a tuple"
 
@@ -82,24 +79,17 @@ def get_compute_metrics_fn(tokenizer: TTokenizer, eval_dataset: Dataset, directo
         prompts = [x["prompt"] for x in eval_dataset] # type: ignore
         completions = [x["completion"] for x in eval_dataset] # type: ignore
 
-        prompts_tokenized = tokenizer.batch_encode_plus(prompts)
-        completions_tokenized = tokenizer.batch_encode_plus(completions)
-
-        length_prompts = [len(x) for x in prompts_tokenized["input_ids"]] # type: ignore
-        length_completions = [len(x) for x in completions_tokenized["input_ids"]] # type: ignore
-
-        completion_pred_tokens = [pred_token[(length_prompt):]
-                                    for pred_token, length_prompt in zip(pred_tokens, length_prompts)]
 
         # Select the tokens that are are completion from the model predictions
-        preds = [x.replace(tokenizer.pad_token, "") for x in tokenizer.batch_decode(completion_pred_tokens)]
+        outs_decoded = tokenizer.batch_decode(pred_tokens)
+        preds = [pred.replace(tokenizer.pad_token, "").replace(prompt, "") for pred, prompt in zip(outs_decoded, prompts)]
         prompts = [x.replace(tokenizer.pad_token, "") for x in prompts]
         labels = completions
 
         eval_results = evaluate_completions_exact_match(Namespace(verbose=False), preds, labels)
         is_correct_list = eval_results["is_correct_list"]
 
-        df = pd.DataFrame({'prompt': prompts, 'labels': labels, 'preds': preds, 'correct': is_correct_list})
+        df = pd.DataFrame({'prompt': prompts, 'labels': labels, 'preds': preds, 'correct': is_correct_list, 'model_outs': outs_decoded})
 
         metrics = {}
 
@@ -125,8 +115,9 @@ def get_datasets(tokenizer, num_retries: int, verbose: bool) -> Tuple[Dict[str, 
     eval_dataset = None
     for i in range(num_retries):
         try:
-            train_dataset = get_hugface_dataset(os.path.join(wandb.config.data_dir, wandb.config.train_path), tokenizer)
-            eval_dataset = get_hugface_dataset(os.path.join(wandb.config.data_dir, wandb.config.validation_path), tokenizer, eval=True)
+            train_path = os.path.join(wandb.config.data_dir, wandb.config.train_path)
+            validation_path = os.path.join(wandb.config.data_dir, wandb.config.validation_path)
+            train_dataset, eval_dataset = get_hugface_datasets(train_path, validation_path, tokenizer)
             break
         except Exception as e:
             print("Failed to generate datasets, retrying")

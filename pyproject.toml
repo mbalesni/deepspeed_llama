@@ -16,6 +16,7 @@ wandb = "^0.14.2"
 debugpy = "^1.6.7"
 poetry = "^1.4.2"
 sentencepiece = "^0.1.98"
+accelerate = "^0.18.0"
 
 
 [build-system]

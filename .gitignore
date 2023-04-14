@@ -15,3 +15,4 @@ experiments/example_sweeps/logs
 experiments/example_sweeps/sweep_configs
 
 .DS_Store
+cache
